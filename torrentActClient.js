@@ -112,7 +112,7 @@ var download = function(){
 						console.log("sourceIP : " + sourceIP);
 						emitRequest(sourceIP, fileId, (i+1));
 						cont = false;
-						if(i== (size/16) - 1){
+						if(i==5){
 							console.log("registering");
 							request.get(data.trackerIP + "/addSeeder?fileId="+fileId+"&ipAdd=192.168.1.8", function(e, r, h){
 								if(e){
@@ -127,6 +127,12 @@ var download = function(){
 								console.log(fileData[k]);
 								str += fileData[k].data;
 							}
+
+							fs.writeFile('g.txt', str, (err)=>{
+								if(err){
+									console.log("File not saved");
+								}
+							});
 						}
 						
 						i++;
@@ -136,10 +142,10 @@ var download = function(){
 								console.log(err);
 							}else{
 								seeders = [];
-								console.log(html);
-								html = JSON.parse(html);
-								for(var j in html){
-									seeders.push(html[j].IpAdd);
+								console.log(h);
+								h = JSON.parse(h);
+								for(var j in h){
+									seeders.push(h[j].IpAdd);
 								}
 							}
 						});
