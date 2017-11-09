@@ -1,0 +1,17 @@
+{
+  "name": "GlobalBellman",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": ""
+  },
+  "dependencies": {
+    "request" : "latest",
+    "ping" : "latest",
+    "execution-time" : "latest",
+    "socket.io" : "latest",
+    "socket.io-client" : "latest",
+    "fs" : "latest",
+    "http" : "latest"
+  }
+}
