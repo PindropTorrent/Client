@@ -112,7 +112,24 @@ var download = function(){
 						console.log("sourceIP : " + sourceIP);
 						emitRequest(sourceIP, fileId, (i+1));
 						cont = false;
-						if(i==5){
+						i++;
+						request(trackerIP, function(e, r, h){
+							if(err){
+								console.log(err);
+							}else{
+								seeders = [];
+								console.log("\nCurrent Seeders :-");
+								console.log(h);
+								console.log("\n");
+
+								h = JSON.parse(h);
+								for(var j in h){
+									seeders.push(h[j].IpAdd);
+								}
+							}
+						});
+					}else{
+						if(cont){
 							console.log("registering");
 							request.get(data.trackerIP + "/addSeeder?fileId="+fileId+"&ipAdd=192.168.1.8", function(e, r, h){
 								if(e){
@@ -131,24 +148,13 @@ var download = function(){
 							fs.writeFile('g.txt', str, (err)=>{
 								if(err){
 									console.log("File not saved");
+								}else{
+									console.log("-----------------------\nDownload Complete\n-----------------\n");
 								}
 							});
-						}
-						
-						i++;
 
-						request(trackerIP, function(e, r, h){
-							if(err){
-								console.log(err);
-							}else{
-								seeders = [];
-								console.log(h);
-								h = JSON.parse(h);
-								for(var j in h){
-									seeders.push(h[j].IpAdd);
-								}
-							}
-						});
+							clearInterval();
+						}
 					}
 				},5000);
 			}
