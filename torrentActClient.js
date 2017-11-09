@@ -98,26 +98,51 @@ var download = function(){
 				}
 
 				var seederLength = seeders.length;
+				var fallback = false;
 				setInterval(function(){
 					if(state == "NOTRECIEVED"){
 						i--;
 						cont=true;
+						fallback = true;
 						state = "RECEIVED";
 					}
 					if(cont && i<(size/16)){
-						sourceIP = "http://" + seeders[i%seederLength] + ":4000";
+						sourceIP = "http://" + seeders[(fallback)?0:(i%seederLength)] + ":4000";
+						fallback = false;
 						console.log("sourceIP : " + sourceIP);
 						emitRequest(sourceIP, fileId, (i+1));
 						cont = false;
-						if(i==1){
-							request.get(data.trackerIP + "/addSeeder?fileId="+fileId+"&IpAdd=192.168.1.8", function(e, r, h){
+						if(i== (size/16) - 1){
+							console.log("registering");
+							request.get(data.trackerIP + "/addSeeder?fileId="+fileId+"&ipAdd=192.168.1.8", function(e, r, h){
 								if(e){
 									console.log(e);
+								}else{
+									console.log("registered");
 								}
 							});	
+
+							var str = "";
+							for(var k in fileData){
+								console.log(fileData[k]);
+								str += fileData[k].data;
+							}
 						}
 						
 						i++;
+
+						request(trackerIP, function(e, r, h){
+							if(err){
+								console.log(err);
+							}else{
+								seeders = [];
+								console.log(html);
+								html = JSON.parse(html);
+								for(var j in html){
+									seeders.push(html[j].IpAdd);
+								}
+							}
+						});
 					}
 				},5000);
 			}
