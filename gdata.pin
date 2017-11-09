@@ -1,5 +1,5 @@
 {
-	"trackerIP" : "google.com",
-	"fileId" : "g.txt",
+	"trackerIP" : "http://35.154.19.141:3000",
+	"fileId" : "g",
 	"fileSize" : 72
 }

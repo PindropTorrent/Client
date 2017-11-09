@@ -1,6 +1,7 @@
 var app = require('http').createServer()
 var io = require('socket.io')(app);
 var fs = require('fs');
+var request = require('request');
 
 app.listen(4000);
 
@@ -49,25 +50,34 @@ io.on('connection', function (socket) {
 
 
 
-var seeders = ['http://192.168.1.10:4000'];
+var seeders = [];
 
 var download = function(){
 	fs.readFile('gdata.pin', (err, data)=> {
 		data = JSON.parse(data);
 		var size = Number(data.fileSize);
 		var fileId = data.fileId;
-		var sourceIP = seeders[0];
+		var trackerIP = (data.trackerIP)+"/getTracker?fileId="+fileId;
 		i=0;
-		console.log(size);
+		request(trackerIP, function(err, res, html){
+			if(err){
+				console.log(err);
+			}else{
+				res = JSON.parse(res);
+				for(var j in res){
+					seeders.push(res[j].IpAdd);
+				}
 
-		setInterval(function(){
-			if(cont && i<(size/16)){
-				// sourceIP = seeders[(i%2==0)?0:1];
-				emitRequest(sourceIP, fileId, (i+1));
-				cont = false;
-				i++;
+				setInterval(function(){
+					if(cont && i<(size/16)){
+						sourceIP = seeders[i];
+						emitRequest(sourceIP, fileId, (i+1));
+						cont = false;
+						i++;
+					}
+				},5000);
 			}
-		},10);
+		});
 	});
 }
 
