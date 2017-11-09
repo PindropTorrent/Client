@@ -33,7 +33,7 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('myevent', function (data) {
-        var fileId = data.fileId;
+        var fileId = data.fileId + ".txt";
         var packetNumber = data.packetNumber;
         var sourceIP = data.sourceIP;
         newSocket = require('socket.io-client')(sourceIP);
@@ -63,14 +63,16 @@ var download = function(){
 			if(err){
 				console.log(err);
 			}else{
-				res = JSON.parse(res);
-				for(var j in res){
-					seeders.push(res[j].IpAdd);
+				console.log(html);
+				html = JSON.parse(html);
+				for(var j in html){
+					seeders.push(html[j].IpAdd);
 				}
 
 				setInterval(function(){
 					if(cont && i<(size/16)){
-						sourceIP = seeders[i];
+						sourceIP = "http://" + seeders[i] + ":4000";
+						console.log("sourceIP : " + sourceIP);
 						emitRequest(sourceIP, fileId, (i+1));
 						cont = false;
 						i++;
