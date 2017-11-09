@@ -8,6 +8,8 @@ app.listen(4000);
 var sck; 
 var cont = true;
 
+var fileData = [];
+
 var emitRequest = function(s, f, n){
 	sck = require('socket.io-client')(s);
 	sck.emit("myevent", {
@@ -23,13 +25,24 @@ var emitData = function(s, data, n){
     s.emit("myeventres", {data : data, packetNumber : n});
 }
 
+var state = "";
+
 io.on('connection', function (socket) {
     console.log("connected");
     socket.on("myeventres", function(data){
     	console.log("HERE");
     	console.log("Data for packet : " + data.packetNumber);
 		console.log(data.data);
-		cont = true;
+		if((data.data).length == 0){
+			cont = false;
+			state = "NOTRECIEVED";
+		}else{
+			item = {};
+			item.packetNumber = data.packetNumber;
+			item.data = data.data;
+			fileData.push(item);
+			cont = true;
+		}
 	});
 
 	socket.on('myevent', function (data) {
@@ -39,11 +52,26 @@ io.on('connection', function (socket) {
         newSocket = require('socket.io-client')(sourceIP);
 
         fs.readFile(fileId, 'utf8', (err, data)=>{
-            console.log(data);
-            var len = data.length;
-            var dataToSend = "";
-            dataToSend = data.substr(16*(packetNumber-1), 16);
-            emitData(newSocket, dataToSend, packetNumber);
+        	if(err){
+        		console.log("File Not present");
+        		var dataToSend = "";
+        		for(var i in fileData){
+        			if(fileData[i].packetNumber == packetNumber){
+        				console.log("Data present with me");
+        				datatToSend = fileData[i].data;
+        				break;
+        			}
+        		}
+        		emitData(newSocket, dataToSend, packetNumber);
+
+        	}else{
+        		console.log("File present");
+        		console.log(data);
+	            var len = data.length;
+	            var dataToSend = "";
+	            dataToSend = data.substr(16*(packetNumber-1), 16);
+	            emitData(newSocket, dataToSend, packetNumber);
+        	}
         });
     });
 });
@@ -71,11 +99,24 @@ var download = function(){
 
 				var seederLength = seeders.length;
 				setInterval(function(){
+					if(state == "NOTRECIEVED"){
+						i--;
+						cont=true;
+						state = "RECEIVED";
+					}
 					if(cont && i<(size/16)){
 						sourceIP = "http://" + seeders[i%seederLength] + ":4000";
 						console.log("sourceIP : " + sourceIP);
 						emitRequest(sourceIP, fileId, (i+1));
 						cont = false;
+						if(i==1){
+							request.get(data.trackerIP + "/addSeeder?fileId="+fileId+"&IpAdd=192.168.1.8", function(e, r, h){
+								if(e){
+									console.log(e);
+								}
+							});	
+						}
+						
 						i++;
 					}
 				},5000);
