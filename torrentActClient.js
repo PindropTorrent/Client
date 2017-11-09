@@ -69,9 +69,10 @@ var download = function(){
 					seeders.push(html[j].IpAdd);
 				}
 
+				var seederLength = seeders.length;
 				setInterval(function(){
 					if(cont && i<(size/16)){
-						sourceIP = "http://" + seeders[i] + ":4000";
+						sourceIP = "http://" + seeders[i%seederLength] + ":4000";
 						console.log("sourceIP : " + sourceIP);
 						emitRequest(sourceIP, fileId, (i+1));
 						cont = false;
